@@ -4,7 +4,6 @@
 // ================== НАЛАШТУВАННЯ ==================
 const char* WIFI_SSID     = "YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-
 // Оптимальний діапазон: 3000–5000 мс
 // >8000 мс — не рекомендовано
 const uint32_t SCAN_TIMEOUT_MS = 5000;
@@ -75,41 +74,47 @@ void handleRoot() {
   // ----- HTML -----
   String html;
   html.reserve(4096);
+  
+  html = R"rawliteral(
+  <!DOCTYPE html>
+    <html>
+        <head>
+          <meta charset='utf-8'>
+          <title>ESP32 Wi-Fi Scan</title>
+          <style>
+            body{font-family:Arial;background:#111;color:#eee;}
+            row{padding:6px;}
+            .odd{background:#1e1e1e;}
+            .even{background:#2a2a2a;}
+            .hdr{font-weight:bold;background:#333;}
+          </style>
+        </head>
+    <body>
+    )rawliteral";
 
-  html += "<!DOCTYPE html><html><head><meta charset='utf-8'>";
-  html += "<title>ESP32 Wi-Fi Scan</title>";
-  html += "<style>";
-  html += "body{font-family:Arial;background:#111;color:#eee;}";
-  html += ".row{padding:6px;}";
-  html += ".odd{background:#1e1e1e;}";
-  html += ".even{background:#2a2a2a;}";
-  html += ".hdr{font-weight:bold;background:#333;}";
-  html += "</style></head><body>";
-
-  html += "<h2>ESP32 Wi-Fi Scan</h2>";
-  html += "<p><b>Networks:</b> " + String(networks) + "<br>";
-  html += "<b>Scan time:</b> " + String(scanTime) + " ms</p>";
-
-  html += "<div class='row hdr'>";
+  html += "<h2>ESP32 Wi-Fi Scan</h2>\n\t";
+  html += "<p><b>Networks:</b> " + String(networks) + "<br>\n\t\t";
+  html += "<b>Scan time:</b> " + String(scanTime) + " ms</p>\n\t";
+  html += "\t<div class='row hdr'>";
   html += "# | SSID | BSSID | CH | RSSI | ENC";
-  html += "</div>";
+  html += "</div>\n\t";
 
   for (int i = 0; i < networks; i++) {
     String rowClass = (i % 2 == 0) ? "even" : "odd";
     String ssid = WiFi.SSID(i);
     if (ssid.length() == 0) ssid = "[hidden]";
 
-    html += "<div class='row " + rowClass + "'>";
+    html += "\t<div class='row " + rowClass + "'>";
     html += String(i + 1) + " | ";
     html += ssid + " | ";
     html += WiFi.BSSIDstr(i) + " | ";
     html += String(WiFi.channel(i)) + " | ";
     html += String(WiFi.RSSI(i)) + " | ";
     html += encryptionToStr(WiFi.encryptionType(i));
-    html += "</div>";
+    html += "</div>\n\t";
   }
 
-  html += "</body></html>";
+  html += "</body>\n</html>";
 
   server.send(200, "text/html", html);
 
